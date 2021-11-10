@@ -7,6 +7,7 @@ import (
 	"github.com/hyperledger-labs/orion-sdk-go/pkg/config"
 	"github.com/hyperledger-labs/orion-server/pkg/logger"
 	"github.com/hyperledger-labs/orion-server/pkg/types"
+	"github.com/pkg/errors"
 	"os"
 )
 
@@ -254,7 +255,7 @@ func validQuery(session bcdb.DBSession) error{
 	}
 	if kvs == nil {
 		println("kvs nil")
-		return nil
+		return errors.New("kvs nil")
 	}
 
 	return nil

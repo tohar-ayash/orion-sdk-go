@@ -16,13 +16,13 @@ import (
 	- ////
 */
 func main() {
-	if err := executeJsonQueryExample(); err != nil {
+	if err := executeJsonQueryExample("../../util/config.yml"); err != nil {
 		os.Exit(1)
 	}
 }
 
-func executeJsonQueryExample() error {
-	session, err := prepareData()
+func executeJsonQueryExample(configLocation string) error {
+	session, err := prepareData(configLocation)
 	if session == nil || err != nil {
 		return err
 	}
@@ -50,8 +50,8 @@ func executeJsonQueryExample() error {
 	return nil
 }
 
-func prepareData() (bcdb.DBSession, error) {
-	c, err := util.ReadConfig("../../util/config.yml")
+func prepareData(configLocation string) (bcdb.DBSession, error) {
+	c, err := util.ReadConfig(configLocation)
 	if err != nil {
 		fmt.Printf(err.Error())
 		return nil, err
@@ -198,6 +198,34 @@ func insertData(session bcdb.DBSession) error{
 		return err
 	}
 	fmt.Printf("Transaction number %s committed successfully\n", txID)
+
+	//check data existence
+	fmt.Println("Opening data transaction")
+	tx, err = session.DataTx()
+	if err != nil {
+		fmt.Printf("Data transaction creating failed, reason: %s\n", err.Error())
+		return err
+	}
+
+	for i:=0; i<10; i++{
+		val, _, err := tx.Get("db", keys[i])
+		if err != nil {
+			fmt.Printf("Adding new key to database failed, reason: %s\n", err.Error())
+			return err
+		}
+		fmt.Println("key " + keys[i] + " value is " + string(val))
+	}
+
+	fmt.Println("Committing transaction")
+	txID, _, err = tx.Commit(true)
+	if err != nil {
+		fmt.Printf("Commit failed, reason: %s\n", err.Error())
+		return err
+	}
+	fmt.Printf("Transaction number %s committed successfully\n", txID)
+
+
+
 
 	return nil
 }
